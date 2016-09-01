@@ -97,7 +97,17 @@ public protocol DKImagePickerControllerUIDelegate {
     func imagePickerControllerCheckedImageTintColor() -> UIColor?
 
 	/**
-     Set the image of the checked display when object is selected. It will display as 9-slice.
+     Set the primary color of checked display when object is selected.
+     */
+	func imagePickerControllerCheckedBackgroundColor() -> UIColor?
+
+	/**
+     Set the primary color of unchecked display when object is selected.
+     */
+	func imagePickerControllerUnCheckedBackgroundColor() -> UIColor?
+
+	/**
+     Set the image of checked display when object is selected. It will display as 9-slice.
      */
 	func imagePickerControllerCheckedImage() -> UIImage?
     

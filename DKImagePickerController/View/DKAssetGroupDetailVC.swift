@@ -53,7 +53,9 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 
     
     class DKAssetCell: UICollectionViewCell {
-        
+        internal var checkedBackgroundColor:UIColor?
+        internal var uncheckedBackgroundColor:UIColor?
+
         class DKImageCheckView: UIView {
 
             internal lazy var checkImageView: UIImageView = {
@@ -141,9 +143,9 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
         override var selected: Bool {
             didSet {
                 if super.selected {
-                    self.videoInfoView.backgroundColor = UIColor(red: 20 / 255, green: 129 / 255, blue: 252 / 255, alpha: 1)
+                    self.videoInfoView.backgroundColor = self.checkedBackgroundColor ?? UIColor(red: 20 / 255, green: 129 / 255, blue: 252 / 255, alpha: 1)
                 } else {
-                    self.videoInfoView.backgroundColor = UIColor(white: 0.0, alpha: 0.7)
+                    self.videoInfoView.backgroundColor = self.uncheckedBackgroundColor ?? UIColor(white: 0.0, alpha: 0.7)
                 }
             }
         }
@@ -359,6 +361,8 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
         cell.checkView.checkImageView.tintColor = self.imagePickerController.UIDelegate.imagePickerControllerCheckedImageTintColor()
         cell.checkView.checkImageView.image = (self.imagePickerController.UIDelegate.imagePickerControllerCheckedImage()
                 ?? DKImageResource.checkedImage()).imageWithRenderingMode(.AlwaysTemplate)
+        cell.checkedBackgroundColor = self.imagePickerController.UIDelegate.imagePickerControllerCheckedBackgroundColor()
+        cell.uncheckedBackgroundColor = self.imagePickerController.UIDelegate.imagePickerControllerUnCheckedBackgroundColor()
         cell.checkView.checkLabel.hidden = self.imagePickerController.UIDelegate.imagePickerControllerCheckedNumberHidden()
         cell.checkView.checkLabel.font = self.imagePickerController.UIDelegate.imagePickerControllerCheckedNumberFont()
         cell.checkView.checkLabel.textColor = self.imagePickerController.UIDelegate.imagePickerControllerCheckedNumberColor()
