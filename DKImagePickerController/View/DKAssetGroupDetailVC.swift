@@ -57,7 +57,7 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
         class DKImageCheckView: UIView {
 
             internal lazy var checkImageView: UIImageView = {
-                let imageView = UIImageView(image: DKImageResource.checkedImage().imageWithRenderingMode(.AlwaysTemplate))
+                let imageView = UIImageView()
                 return imageView
             }()
             
@@ -353,9 +353,13 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 		} else {
 			identifier = DKImageAssetIdentifier
 		}
-		
-		cell = self.collectionView!.dequeueReusableCellWithReuseIdentifier(identifier, forIndexPath: indexPath) as! DKAssetCell
+
+        //configure initial cell appearance
+        cell = self.collectionView!.dequeueReusableCellWithReuseIdentifier(identifier, forIndexPath: indexPath) as! DKAssetCell
         cell.checkView.checkImageView.tintColor = self.imagePickerController.UIDelegate.imagePickerControllerCheckedImageTintColor()
+        cell.checkView.checkImageView.image = (self.imagePickerController.UIDelegate.imagePickerControllerCheckedImage()
+                ?? DKImageResource.checkedImage()).imageWithRenderingMode(.AlwaysTemplate)
+        cell.checkView.checkLabel.hidden = self.imagePickerController.UIDelegate.imagePickerControllerCheckedNumberHidden()
         cell.checkView.checkLabel.font = self.imagePickerController.UIDelegate.imagePickerControllerCheckedNumberFont()
         cell.checkView.checkLabel.textColor = self.imagePickerController.UIDelegate.imagePickerControllerCheckedNumberColor()
 

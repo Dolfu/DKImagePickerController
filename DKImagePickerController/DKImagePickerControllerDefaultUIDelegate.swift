@@ -108,12 +108,20 @@ public class DKImagePickerControllerDefaultUIDelegate: NSObject, DKImagePickerCo
     public func imagePickerControllerCheckedNumberFont() -> UIFont {
         return UIFont.boldSystemFontOfSize(14)
     }
-    
+
+    public func imagePickerControllerCheckedNumberHidden() -> Bool {
+        return false
+    }
+
     public func imagePickerControllerCheckedImageTintColor() -> UIColor? {
         return nil
     }
-    
-    public func imagePickerControllerCollectionViewBackgroundColor() -> UIColor {
+
+	public func imagePickerControllerCheckedImage() -> UIImage? {
+		return nil
+	}
+
+	public func imagePickerControllerCollectionViewBackgroundColor() -> UIColor {
         return UIColor.whiteColor()
     }
 	

@@ -75,7 +75,12 @@ public protocol DKImagePickerControllerUIDelegate {
      The camera image to be displayed in the album's first cell.
      */
     func imagePickerControllerCameraImage() -> UIImage
-    
+
+	/**
+     Set the hidden of the number when object is selected.
+     */
+	func imagePickerControllerCheckedNumberHidden() -> Bool
+
     /**
      Set the color of the number when object is selected.
      */
@@ -90,6 +95,11 @@ public protocol DKImagePickerControllerUIDelegate {
      Set the color of the object outline when object is selected.
      */
     func imagePickerControllerCheckedImageTintColor() -> UIColor?
+
+	/**
+     Set the image of the checked display when object is selected. It will display as 9-slice.
+     */
+	func imagePickerControllerCheckedImage() -> UIImage?
     
     /**
      Set the color of the background of the collection view.
