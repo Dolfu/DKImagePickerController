@@ -26,7 +26,7 @@ public class DKAsset: NSObject {
 	
 	/// When the asset was an image, it's false. Otherwise true.
 	public private(set) var isVideo: Bool = false
-	
+
 	/// play time duration(seconds) of a video.
 	public private(set) var duration: Double?
 	

@@ -9,10 +9,11 @@
 import UIKit
 import AVFoundation
 import Photos
+import PhotosUI
 
 private let DKImageCameraIdentifier = "DKImageCameraIdentifier"
 private let DKImageAssetIdentifier = "DKImageAssetIdentifier"
-private let DKVideoAssetIdentifier = "DKVideoAssetIdentifier"
+private let DKMediaAssetIdentifier = "DKMediaAssetIdentifier"
 
 // Show all images in the asset group
 internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, DKGroupDataManagerObserver {
@@ -128,17 +129,29 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
         }
 		
     } /* DKAssetCell */
-    
-    class DKVideoAssetCell: DKAssetCell {
-		
-		override var asset: DKAsset! {
+
+    private static let TagForDurationLabel:Int = 1
+    private static let TagForIconImageView:Int = 2
+
+    class DKMediaAssetCell: DKAssetCell {
+
+        override var asset: DKAsset! {
 			didSet {
-				let videoDurationLabel = self.videoInfoView.viewWithTag(-1) as! UILabel
-				let minutes: Int = Int(asset.duration!) / 60
-				let seconds: Int = Int(round(asset.duration!)) % 60
-				videoDurationLabel.text = String(format: "\(minutes):%02d", seconds)
+                self.videoInfoView.hidden = self.asset.duration==0
+                if !self.videoInfoView.hidden {
+                    let videoDurationLabel = self.videoInfoView.viewWithTag(TagForDurationLabel) as! UILabel
+                    let minutes: Int = Int(asset.duration!) / 60
+                    let seconds: Int = Int(round(asset.duration!)) % 60
+                    videoDurationLabel.text = String(format: "\(minutes):%02d", seconds)
+                }
 			}
 		}
+
+        private var assetIconImage: UIImage? {
+            didSet {
+                (self.videoInfoView.viewWithTag(TagForIconImageView) as! UIImageView).image = self.assetIconImage
+            }
+        }
 		
         override var selected: Bool {
             didSet {
@@ -151,23 +164,24 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
         }
         
         private lazy var videoInfoView: UIView = {
-            let videoInfoView = UIView(frame: CGRect(x: 0, y: 0, width: 100, height: 0))
+            let mediaInfoView = UIView(frame: CGRect(x: 0, y: 0, width: 100, height: 0))
 
             let videoImageView = UIImageView(image: DKImageResource.videoCameraIcon())
-            videoInfoView.addSubview(videoImageView)
-            videoImageView.center = CGPoint(x: videoImageView.bounds.width / 2 + 7, y: videoInfoView.bounds.height / 2)
+            videoImageView.tag = TagForIconImageView
+            mediaInfoView.addSubview(videoImageView)
+            videoImageView.center = CGPoint(x: videoImageView.bounds.width / 2 + 7, y: mediaInfoView.bounds.height / 2)
             videoImageView.autoresizingMask = [.FlexibleBottomMargin, .FlexibleTopMargin]
             
             let videoDurationLabel = UILabel()
-            videoDurationLabel.tag = -1
+            videoDurationLabel.tag = TagForDurationLabel
             videoDurationLabel.textAlignment = .Right
             videoDurationLabel.font = UIFont.systemFontOfSize(12)
             videoDurationLabel.textColor = UIColor.whiteColor()
-            videoInfoView.addSubview(videoDurationLabel)
-            videoDurationLabel.frame = CGRect(x: 0, y: 0, width: videoInfoView.bounds.width - 7, height: videoInfoView.bounds.height)
+            mediaInfoView.addSubview(videoDurationLabel)
+            videoDurationLabel.frame = CGRect(x: 0, y: 0, width: mediaInfoView.bounds.width - 7, height: mediaInfoView.bounds.height)
             videoDurationLabel.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
             
-            return videoInfoView
+            return mediaInfoView
         }()
         
         override init(frame: CGRect) {
@@ -188,7 +202,7 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
                 width: self.contentView.bounds.width, height: height)
         }
         
-    } /* DKVideoAssetCell */
+    } /* DKMediaAssetCell */
 	
     private lazy var selectGroupButton: UIButton = {
         let button = UIButton()
@@ -248,7 +262,7 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 		self.collectionView.dataSource = self
         self.collectionView.registerClass(DKImageCameraCell.self, forCellWithReuseIdentifier: DKImageCameraIdentifier)
         self.collectionView.registerClass(DKAssetCell.self, forCellWithReuseIdentifier: DKImageAssetIdentifier)
-        self.collectionView.registerClass(DKVideoAssetCell.self, forCellWithReuseIdentifier: DKVideoAssetIdentifier)
+        self.collectionView.registerClass(DKMediaAssetCell.self, forCellWithReuseIdentifier: DKMediaAssetIdentifier)
 		self.view.addSubview(self.collectionView)
 		
 		self.footerView = self.imagePickerController.UIDelegate.imagePickerControllerFooterView(self.imagePickerController)
@@ -349,12 +363,36 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 		let asset = getImageManager().groupDataManager.fetchAssetWithGroup(group, index: assetIndex)
 		
 		var cell: DKAssetCell!
-		var identifier: String!
-		if asset.isVideo {
-			identifier = DKVideoAssetIdentifier
-		} else {
-			identifier = DKImageAssetIdentifier
-		}
+
+        let cellSettingsByAsset:(String, UIImage?) = {
+            let originalAsset = asset.originalAsset!
+            switch (originalAsset.mediaType, originalAsset.mediaSubtypes){
+                case let (.Image, x) where x.contains(.PhotoLive): //Live Photo
+                    return (
+                            DKMediaAssetIdentifier,
+                            self.imagePickerController.UIDelegate.imagePickerControllerAssetLivePhotoIconImage()
+                                    ?? PHLivePhotoView.livePhotoBadgeImageWithOptions(.OverContent)
+                            )
+
+                case (.Image, _):
+                    return (
+                            DKImageAssetIdentifier,
+                            self.imagePickerController.UIDelegate.imagePickerControllerAssetPhotoIconImage()
+                            )
+
+                case (.Video, _):
+                    return (
+                            DKMediaAssetIdentifier,
+                            self.imagePickerController.UIDelegate.imagePickerControllerAssetVideoIconImage()
+                                    ?? DKImageResource.videoCameraIcon()
+                            )
+
+                default:
+                    return (DKImageAssetIdentifier, nil)
+            }
+        }()
+        let identifier: String! = cellSettingsByAsset.0
+        let assetIconImage:UIImage? = cellSettingsByAsset.1
 
         //configure initial cell appearance
         cell = self.collectionView!.dequeueReusableCellWithReuseIdentifier(identifier, forIndexPath: indexPath) as! DKAssetCell
@@ -366,6 +404,8 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
         cell.checkView.checkLabel.hidden = self.imagePickerController.UIDelegate.imagePickerControllerCheckedNumberHidden()
         cell.checkView.checkLabel.font = self.imagePickerController.UIDelegate.imagePickerControllerCheckedNumberFont()
         cell.checkView.checkLabel.textColor = self.imagePickerController.UIDelegate.imagePickerControllerCheckedNumberColor()
+        //set asset's icon image
+        (cell as? DKMediaAssetCell)?.assetIconImage = assetIconImage
 
         cell.asset = asset
 		let tag = indexPath.row + 1

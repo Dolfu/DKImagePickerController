@@ -116,6 +116,21 @@ public protocol DKImagePickerControllerUIDelegate {
      */
     func imagePickerControllerCollectionViewBackgroundColor() -> UIColor
 
+	/**
+     PHAsset Video Icon Image
+     */
+	func imagePickerControllerAssetVideoIconImage() -> UIImage?
+
+	/**
+     PHAsset Photo Icon Image
+     */
+	func imagePickerControllerAssetPhotoIconImage() -> UIImage?
+
+	/**
+     PHAsset Live Photo Icon Image
+     */
+	func imagePickerControllerAssetLivePhotoIconImage() -> UIImage?
+
 }
 
 /**

@@ -132,8 +132,21 @@ public class DKImagePickerControllerDefaultUIDelegate: NSObject, DKImagePickerCo
 	public func imagePickerControllerCollectionViewBackgroundColor() -> UIColor {
         return UIColor.whiteColor()
     }
-	
-	// Internal
+
+    public func imagePickerControllerAssetVideoIconImage() -> UIImage? {
+        return nil
+    }
+
+    public func imagePickerControllerAssetPhotoIconImage() -> UIImage? {
+        return nil
+    }
+
+    public func imagePickerControllerAssetLivePhotoIconImage() -> UIImage? {
+        return nil
+    }
+
+
+    // Internal
 	
 	public func checkCameraPermission(camera: DKCamera) {
 		func cameraDenied() {
