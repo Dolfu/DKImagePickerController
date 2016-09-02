@@ -9,7 +9,6 @@
 import UIKit
 import AVFoundation
 import Photos
-import PhotosUI
 
 private let DKImageCameraIdentifier = "DKImageCameraIdentifier"
 private let DKImageAssetIdentifier = "DKImageAssetIdentifier"
@@ -137,8 +136,7 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 
         override var asset: DKAsset! {
 			didSet {
-                self.videoInfoView.hidden = self.asset.duration==0
-                if !self.videoInfoView.hidden {
+                if self.asset.duration>0 {
                     let videoDurationLabel = self.videoInfoView.viewWithTag(TagForDurationLabel) as! UILabel
                     let minutes: Int = Int(asset.duration!) / 60
                     let seconds: Int = Int(round(asset.duration!)) % 60
@@ -149,6 +147,7 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 
         private var assetIconImage: UIImage? {
             didSet {
+                self.videoInfoView.hidden = self.assetIconImage == nil
                 (self.videoInfoView.viewWithTag(TagForIconImageView) as! UIImageView).image = self.assetIconImage
             }
         }
@@ -166,11 +165,12 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
         private lazy var videoInfoView: UIView = {
             let mediaInfoView = UIView(frame: CGRect(x: 0, y: 0, width: 100, height: 0))
 
-            let videoImageView = UIImageView(image: DKImageResource.videoCameraIcon())
-            videoImageView.tag = TagForIconImageView
-            mediaInfoView.addSubview(videoImageView)
-            videoImageView.center = CGPoint(x: videoImageView.bounds.width / 2 + 7, y: mediaInfoView.bounds.height / 2)
-            videoImageView.autoresizingMask = [.FlexibleBottomMargin, .FlexibleTopMargin]
+            let mediaIconImageView = UIImageView(image: DKImageResource.videoCameraIcon())
+            mediaIconImageView.tag = TagForIconImageView
+            mediaInfoView.addSubview(mediaIconImageView)
+            mediaIconImageView.center = CGPoint(x: mediaIconImageView.bounds.width / 2 + 7, y: mediaInfoView.bounds.height / 2)
+            mediaIconImageView.autoresizingMask = [.FlexibleBottomMargin, .FlexibleTopMargin]
+            mediaIconImageView.contentMode = .ScaleAspectFit
             
             let videoDurationLabel = UILabel()
             videoDurationLabel.tag = TagForDurationLabel
@@ -371,7 +371,6 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
                     return (
                             DKMediaAssetIdentifier,
                             self.imagePickerController.UIDelegate.imagePickerControllerAssetLivePhotoIconImage()
-                                    ?? PHLivePhotoView.livePhotoBadgeImageWithOptions(.OverContent)
                             )
 
                 case (.Image, _):
@@ -393,6 +392,7 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
         }()
         let identifier: String! = cellSettingsByAsset.0
         let assetIconImage:UIImage? = cellSettingsByAsset.1
+        print(assetIconImage)
 
         //configure initial cell appearance
         cell = self.collectionView!.dequeueReusableCellWithReuseIdentifier(identifier, forIndexPath: indexPath) as! DKAssetCell
@@ -404,10 +404,12 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
         cell.checkView.checkLabel.hidden = self.imagePickerController.UIDelegate.imagePickerControllerCheckedNumberHidden()
         cell.checkView.checkLabel.font = self.imagePickerController.UIDelegate.imagePickerControllerCheckedNumberFont()
         cell.checkView.checkLabel.textColor = self.imagePickerController.UIDelegate.imagePickerControllerCheckedNumberColor()
+
         //set asset's icon image
         (cell as? DKMediaAssetCell)?.assetIconImage = assetIconImage
 
         cell.asset = asset
+
 		let tag = indexPath.row + 1
 		cell.tag = tag
 		

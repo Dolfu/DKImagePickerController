@@ -40,8 +40,8 @@ public class DKAsset: NSObject {
 		let assetType = originalAsset.mediaType
 		if assetType == .Video {
 			self.isVideo = true
-			self.duration = originalAsset.duration
 		}
+        self.duration = originalAsset.duration
 	}
 	
 	private var image: UIImage?
