@@ -133,9 +133,9 @@ public class DKPopoverViewController: UIViewController {
         self.popoverView.frame = self.calculatePopoverViewFrame()
 		
         self.popoverView.transform = CGAffineTransformScale(CGAffineTransformTranslate(self.popoverView.transform, 0, -(self.popoverView.bounds.height / 2)), 0.1, 0.1)
-        UIView.animateWithDuration(0.6, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1.3, options: [.CurveEaseInOut, .AllowUserInteraction], animations: {
+        UIView.animateWithDuration(0.15, delay: 0, options: [.CurveEaseInOut, .AllowUserInteraction], animations: {
             self.popoverView.transform = CGAffineTransformIdentity
-            self.view.backgroundColor = UIColor(white: 0.4, alpha: 0.4)
+            self.view.backgroundColor = (UINavigationBar.appearance().barTintColor ?? UIColor(white: 0.4, alpha:1)).colorWithAlphaComponent(0.8)
         }, completion: nil)
     }
     

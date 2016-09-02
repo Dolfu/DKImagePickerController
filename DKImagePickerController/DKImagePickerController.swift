@@ -131,6 +131,31 @@ public protocol DKImagePickerControllerUIDelegate {
      */
 	func imagePickerControllerAssetLivePhotoIconImage() -> UIImage?
 
+	/*
+	Set the image of checked icon when album in list is selected.
+	*/
+	func imagePickerControllerAlbumSelectListCheckedIconImage() -> UIImage?
+
+	/*
+	Set the color of name label in album select list.
+	*/
+	func imagePickerControllerAlbumSelectListNameLabelTextColor() -> UIColor?
+
+	/*
+	Set the color of album's count label in album select list.
+	*/
+	func imagePickerControllerAlbumSelectListCountLabelTextColor() -> UIColor?
+
+	/*
+	Set the tintcolor of checked icon when album in list is selected.
+	*/
+	func imagePickerControllerAlbumSelectListTCheckedIconImageTintColor() -> UIColor?
+
+	/*
+	Set the color of separator line in album select list.
+	*/
+	func imagePickerControllerAlbumSelectListSeparatorColor() -> UIColor?
+
 }
 
 /**

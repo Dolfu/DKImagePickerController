@@ -209,10 +209,10 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 		
 		let globalTitleColor = UINavigationBar.appearance().titleTextAttributes?[NSForegroundColorAttributeName] as? UIColor
 		button.setTitleColor(globalTitleColor ?? UIColor.blackColor(), forState: .Normal)
-		
+
 		let globalTitleFont = UINavigationBar.appearance().titleTextAttributes?[NSFontAttributeName] as? UIFont
-		button.titleLabel!.font = globalTitleFont ?? UIFont.boldSystemFontOfSize(18.0)
-		
+		button.titleLabel!.font = globalTitleFont ?? UIFont.systemFontOfSize(18.0)
+
 		button.addTarget(self, action: #selector(DKAssetGroupDetailVC.showGroupSelector), forControlEvents: .TouchUpInside)
         return button
     }()
@@ -298,6 +298,15 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 			self.groupListVC = DKAssetGroupListVC(selectedGroupDidChangeBlock: { [unowned self] groupId in
 				self.selectAssetGroup(groupId)
 			}, defaultAssetGroup: self.imagePickerController.defaultAssetGroup)
+
+            let style = DKAssetGroupCellStyle()
+            style.separatorLineColor = self.imagePickerController.UIDelegate.imagePickerControllerAlbumSelectListSeparatorColor()
+            style.countLabelColor = self.imagePickerController.UIDelegate.imagePickerControllerAlbumSelectListCountLabelTextColor()
+            style.nameLabelColor = self.imagePickerController.UIDelegate.imagePickerControllerAlbumSelectListNameLabelTextColor()
+            style.checkedIconImage = self.imagePickerController.UIDelegate.imagePickerControllerAlbumSelectListCheckedIconImage()
+            style.checkedIconTintColor = self.imagePickerController.UIDelegate.imagePickerControllerAlbumSelectListTCheckedIconImageTintColor()
+
+            self.groupListVC.groupListCellStyle = style
 			self.groupListVC.loadGroups()
 		}
 		
@@ -406,7 +415,6 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
         }()
         let identifier: String! = cellSettingsByAsset.0
         let assetIconImage:UIImage? = cellSettingsByAsset.1
-        print(assetIconImage)
 
         //configure initial cell appearance
         cell = self.collectionView!.dequeueReusableCellWithReuseIdentifier(identifier, forIndexPath: indexPath) as! DKAssetCell

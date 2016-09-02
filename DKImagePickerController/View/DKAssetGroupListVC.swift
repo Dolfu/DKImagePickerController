@@ -10,8 +10,28 @@ import Photos
 
 let DKImageGroupCellIdentifier = "DKImageGroupCellIdentifier"
 
+public class DKAssetGroupCellStyle {
+    public lazy var separatorLineColor: UIColor? = {
+        return UIColor.lightGrayColor()
+    }()
+
+    public lazy var countLabelColor: UIColor? = {
+        return UIColor.lightGrayColor()
+    }()
+
+    public lazy var checkedIconTintColor: UIColor? = {
+        return UIColor.grayColor()
+    }()
+
+    public var checkedIconImage: UIImage?
+
+    public var nameLabelColor: UIColor? = {
+        return UIColor.grayColor()
+    }()
+}
+
 class DKAssetGroupCell: UITableViewCell {
-    
+
     class DKAssetGroupSeparator: UIView {
 
         override var backgroundColor: UIColor? {
@@ -36,14 +56,13 @@ class DKAssetGroupCell: UITableViewCell {
 	
     var groupNameLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.boldSystemFontOfSize(13)
+        label.font = UIFont.systemFontOfSize(14)
         return label
     }()
 	
     var totalCountLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFontOfSize(10)
-        label.textColor = UIColor.grayColor()
+        label.font = UIFont.systemFontOfSize(11)
         return label
     }()
     
@@ -55,6 +74,8 @@ class DKAssetGroupCell: UITableViewCell {
             y: (selectedBackgroundView.bounds.width - selectedFlag.bounds.width) / 2,
             width: selectedFlag.bounds.width, height: selectedFlag.bounds.height)
         selectedFlag.autoresizingMask = [.FlexibleLeftMargin, .FlexibleTopMargin, .FlexibleBottomMargin]
+        selectedFlag.contentMode = .ScaleAspectFill
+        selectedFlag.tag = -1
         selectedBackgroundView.addSubview(selectedFlag)
         
         return selectedBackgroundView
@@ -63,11 +84,10 @@ class DKAssetGroupCell: UITableViewCell {
     lazy var customSeparator: DKAssetGroupSeparator = {
         let separator = DKAssetGroupSeparator(frame: CGRectMake(10, self.bounds.height - 1, self.bounds.width, 0.5))
         
-        separator.backgroundColor = UIColor.lightGrayColor()
         separator.autoresizingMask = [.FlexibleWidth, .FlexibleTopMargin]
         return separator
     }()
-    
+
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
@@ -97,11 +117,39 @@ class DKAssetGroupCell: UITableViewCell {
         
         self.totalCountLabel.frame = CGRect(x: self.groupNameLabel.frame.minX, y: self.thumbnailImageView.frame.maxY - 20, width: 200, height: 20)
     }
-    
+
+    internal lazy var cellStyle: DKAssetGroupCellStyle = {
+        return DKAssetGroupCellStyle()
+    }()
+
+    private func setStyle(style:DKAssetGroupCellStyle?) {
+        self.cellStyle = style!
+
+        let iconImageView = self.customSelectedBackgroundView.subviews.first as? UIImageView
+        //checkedIconImage
+        if self.cellStyle.checkedIconImage != nil{
+            if self.cellStyle.checkedIconTintColor != nil {
+                let equal = iconImageView?.tintColor==nil ?? iconImageView?.tintColor.isEqual(self.cellStyle.checkedIconTintColor)
+                if !equal {
+                    iconImageView?.image = self.cellStyle.checkedIconImage?.imageWithRenderingMode(.AlwaysTemplate)
+                }
+            }else{
+                iconImageView?.image = self.cellStyle.checkedIconImage
+            }
+        }
+        //checkedIconTintColor
+        iconImageView?.tintColor = self.cellStyle.checkedIconTintColor
+        //nameLabelColor
+        self.groupNameLabel.textColor = self.cellStyle.nameLabelColor ?? UITableViewCell.appearance().tintColor
+        //countLabelColor
+        self.totalCountLabel.textColor = self.cellStyle.countLabelColor
+        //separatorLineColor
+        self.customSeparator.backgroundColor = self.cellStyle.separatorLineColor
+    }
 }
 
 class DKAssetGroupListVC: UITableViewController, DKGroupDataManagerObserver {
-    
+
 	convenience init(selectedGroupDidChangeBlock: (groupId: String?) -> (), defaultAssetGroup: PHAssetCollectionSubtype?) {
 		self.init(style: .Plain)
 		
@@ -116,7 +164,9 @@ class DKAssetGroupListVC: UITableViewController, DKGroupDataManagerObserver {
 	private var defaultAssetGroup: PHAssetCollectionSubtype?
 	
     private var selectedGroupDidChangeBlock:((group: String?)->())?
-	
+
+    internal var groupListCellStyle: DKAssetGroupCellStyle?
+
 	private lazy var groupThumbnailRequestOptions: PHImageRequestOptions = {
 		let options = PHImageRequestOptions()
 		options.deliveryMode = .Opportunistic
@@ -210,7 +260,9 @@ class DKAssetGroupListVC: UITableViewController, DKGroupDataManagerObserver {
 			}
 		}
         cell.totalCountLabel.text = "\(assetGroup.totalCount)"
-        
+
+        cell.setStyle(self.groupListCellStyle)
+
         return cell
     }
     

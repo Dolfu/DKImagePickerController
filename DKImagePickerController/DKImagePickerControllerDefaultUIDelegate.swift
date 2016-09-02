@@ -145,8 +145,28 @@ public class DKImagePickerControllerDefaultUIDelegate: NSObject, DKImagePickerCo
         return nil
     }
 
+	public func imagePickerControllerAlbumSelectListCheckedIconImage() -> UIImage? {
+		return nil
+	}
 
-    // Internal
+	public func imagePickerControllerAlbumSelectListNameLabelTextColor() -> UIColor? {
+		return nil
+	}
+
+	public func imagePickerControllerAlbumSelectListCountLabelTextColor() -> UIColor? {
+		return nil
+	}
+
+	public func imagePickerControllerAlbumSelectListTCheckedIconImageTintColor() -> UIColor? {
+		return nil
+	}
+
+	public func imagePickerControllerAlbumSelectListSeparatorColor() -> UIColor? {
+		return nil
+	}
+
+
+	// Internal
 	
 	public func checkCameraPermission(camera: DKCamera) {
 		func cameraDenied() {
