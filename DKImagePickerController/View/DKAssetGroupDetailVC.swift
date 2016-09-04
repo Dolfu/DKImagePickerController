@@ -325,9 +325,8 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
         if(self.imagePickerController.deselectAllWhenChangingAlbum
             || self.imagePickerController.allowCirculatingSelection){            
             self.imagePickerController.deselectAllAssets()
-        }else{
-            self.collectionView!.reloadData()
         }
+        self.collectionView!.reloadData()
     }
 	
 	func updateTitleView() {
