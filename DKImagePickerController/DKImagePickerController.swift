@@ -341,6 +341,26 @@ public class DKImagePickerController : UINavigationController {
 					self.UIDelegate.imagePickerController(self, didSelectAssets: [self.defaultSelectedAssets!.last!])
 				}
 			}
+
+		}else{
+
+			//reload from previous invaildation cycle
+			if !self.isMovingToParentViewController(){
+				if let rootVC = self.viewControllers.first as? DKAssetGroupDetailVC {
+					rootVC.collectionView?.reloadItemsAtIndexPaths((rootVC.collectionView?.indexPathsForVisibleItems())!)
+				}
+			}
+		}
+	}
+
+	override public func viewDidDisappear(animated: Bool) {
+		super.viewDidDisappear(animated)
+
+		//invaildate caches
+		if !self.isMovingFromParentViewController(){
+			if let rootVC = self.viewControllers.first as? DKAssetGroupDetailVC {
+				rootVC.invalidateContents()
+			}
 		}
 	}
 	

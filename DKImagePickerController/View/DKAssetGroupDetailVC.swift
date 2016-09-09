@@ -286,6 +286,20 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 		}
 	}
 	
+    func invalidateContents(){
+        DKImageManager.sharedInstance.invalidateCaches()
+
+        self.selectGroupButton.setAttributedTitle(nil, forState: .Normal)
+
+        for cell:DKAssetCell in self.collectionView?.visibleCells() as! [DKAssetCell] {
+            cell.thumbnailImageView.image = nil
+            cell.checkView.checkImageView.image = nil;
+            if cell is DKMediaAssetCell{
+                (cell as? DKMediaAssetCell)?.assetIconImage = nil
+            }
+        }
+    }
+
 	internal func checkPhotoPermission() {
 		func photoDenied() {
 			self.view.addSubview(DKPermissionView.permissionView(.Photo))
