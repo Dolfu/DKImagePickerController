@@ -87,7 +87,11 @@ public class DKImageManager: DKBaseManager {
 	public func invalidate() {
 		self.groupDataManager.invalidate()
 	}
-	
+
+	public func invalidateCaches() {
+
+	}
+
 	public func fetchImageForAsset(asset: DKAsset, size: CGSize, completeBlock: (image: UIImage?, info: [NSObject : AnyObject]?) -> Void) {
 		self.fetchImageForAsset(asset, size: size, options: nil, completeBlock: completeBlock)
 	}
