@@ -287,8 +287,6 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 	}
 	
     func invalidateContents(){
-        DKImageManager.sharedInstance.invalidateCaches()
-
         self.selectGroupButton.setAttributedTitle(nil, forState: .Normal)
 
         for cell:DKAssetCell in self.collectionView?.visibleCells() as! [DKAssetCell] {
@@ -298,6 +296,25 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
                 (cell as? DKMediaAssetCell)?.assetIconImage = nil
             }
         }
+
+        DKImageManager.sharedInstance.invalidateCaches()
+
+        self.invalidateCachedStaticResources()
+        self.invalidateCachedAssetsOfCurrentGroup()
+
+//        self.cachedThumbnailImages = nil
+    }
+
+    func invalidateCachedStaticResources(){
+        self.cachedCheckedImage = nil
+        self.cachedPhotoIconInfo = nil
+        self.cachedLivePhotoIconInfo = nil
+        self.cachedVideoIconInfo = nil
+    }
+
+    func invalidateCachedAssetsOfCurrentGroup(){
+        self.cachedAssets = nil
+        self.cachedGroups = nil
     }
 
 	internal func checkPhotoPermission() {
@@ -333,13 +350,14 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
         if self.selectedGroupId == groupId {
             return
         }
-        
+
         self.selectedGroupId = groupId
         self.updateTitleView()
         if(self.imagePickerController.deselectAllWhenChangingAlbum
             || self.imagePickerController.allowCirculatingSelection){            
             self.imagePickerController.deselectAllAssets(false)
         }
+        self.invalidateCachedAssetsOfCurrentGroup()
         self.collectionView!.reloadData()
     }
 	
@@ -399,49 +417,47 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 
         return cell
 	}
-	
-	func assetCellForIndexPath(indexPath: NSIndexPath) -> UICollectionViewCell {
+
+    var cachedCheckedImage:UIImage?
+    var cachedLivePhotoIconInfo:(String, UIImage?)?
+    var cachedPhotoIconInfo:(String, UIImage?)?
+    var cachedVideoIconInfo:(String, UIImage?)?
+    var cachedGroups:[String:DKAssetGroup]?
+    var cachedAssets:[String:[Int:DKAsset]]?
+    var cachedThumbnailImages:[String:UIImage]?
+
+    func assetCellForIndexPath(indexPath: NSIndexPath) -> UICollectionViewCell {
 		let assetIndex = (indexPath.row - (self.hidesCamera ? 0 : 1))
-		let group = getImageManager().groupDataManager.fetchGroupWithGroupId(self.selectedGroupId!)
+
+        if cachedGroups == nil{
+            cachedGroups = [:]
+        }
+        if cachedGroups!.indexForKey(self.selectedGroupId!) == nil{
+           self.cachedGroups![self.selectedGroupId!] = getImageManager().groupDataManager.fetchGroupWithGroupId(self.selectedGroupId!)
+        }
+		let group = cachedGroups![self.selectedGroupId!]!
 		
-		let asset = getImageManager().groupDataManager.fetchAssetWithGroup(group, index: assetIndex)
+        if cachedAssets == nil{
+            cachedAssets = [:]
+        }
+        if cachedAssets!.indexForKey(group.groupId) == nil{
+            self.cachedAssets![group.groupId] = [:]
+        }
+        if self.cachedAssets![group.groupId]!.indexForKey(assetIndex) == nil{
+            self.cachedAssets![group.groupId]![assetIndex] = getImageManager().groupDataManager.fetchAssetWithGroup(group, index: assetIndex)
+        }
+		let asset:DKAsset = self.cachedAssets![group.groupId]![assetIndex]!
 		
 		var cell: DKAssetCell!
 
-        let cellSettingsByAsset:(String, UIImage?) = {
-            let originalAsset = asset.originalAsset!
-            switch (originalAsset.mediaType, originalAsset.mediaSubtypes){
-                case let (.Image, x) where x.contains(.PhotoLive): //Live Photo
-                    return (
-                            DKMediaAssetIdentifier,
-                            self.imagePickerController.UIDelegate.imagePickerControllerAssetLivePhotoIconImage()
-                            )
-
-                case (.Image, _):
-                    return (
-                            DKImageAssetIdentifier,
-                            self.imagePickerController.UIDelegate.imagePickerControllerAssetPhotoIconImage()
-                            )
-
-                case (.Video, _):
-                    return (
-                            DKMediaAssetIdentifier,
-                            self.imagePickerController.UIDelegate.imagePickerControllerAssetVideoIconImage()
-                                    ?? DKImageResource.videoCameraIcon()
-                            )
-
-                default:
-                    return (DKImageAssetIdentifier, nil)
-            }
-        }()
+        let cellSettingsByAsset:(String, UIImage?) = self.cellSettingsByAsset(asset)
         let identifier: String! = cellSettingsByAsset.0
         let assetIconImage:UIImage? = cellSettingsByAsset.1
 
         //configure initial cell appearance
         cell = self.collectionView!.dequeueReusableCellWithReuseIdentifier(identifier, forIndexPath: indexPath) as! DKAssetCell
         cell.checkView.checkImageView.tintColor = self.imagePickerController.UIDelegate.imagePickerControllerCheckedImageTintColor()
-        cell.checkView.checkImageView.image = (self.imagePickerController.UIDelegate.imagePickerControllerCheckedImage()
-                ?? DKImageResource.checkedImage()).imageWithRenderingMode(.AlwaysTemplate)
+        cell.checkView.checkImageView.image = self.cellCheckedImage()
         cell.checkedBackgroundColor = self.imagePickerController.UIDelegate.imagePickerControllerCheckedBackgroundColor()
         cell.uncheckedBackgroundColor = self.imagePickerController.UIDelegate.imagePickerControllerUnCheckedBackgroundColor()
         cell.checkView.checkLabel.hidden = self.imagePickerController.UIDelegate.imagePickerControllerCheckedNumberHidden()
@@ -457,11 +473,20 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 		cell.tag = tag
 		
 		let itemSize = self.collectionView!.collectionViewLayout.layoutAttributesForItemAtIndexPath(indexPath)!.size
-		asset.fetchImageWithSize(itemSize.toPixel(), options: self.groupImageRequestOptions, contentMode: .AspectFill) { (image, info) in
-			if cell.tag == tag {
-				cell.thumbnailImageView.image = image
-			}
-		}
+
+        if cachedThumbnailImages==nil{
+            cachedThumbnailImages = [:]
+        }
+        if cachedThumbnailImages!.indexForKey((asset.originalAsset?.localIdentifier)!) == nil{
+            asset.fetchImageWithSize(itemSize.toPixel(), options: self.groupImageRequestOptions, contentMode: .AspectFill) { (image, info) in
+                if cell.tag == tag {
+                    cell.thumbnailImageView.image = image
+                }
+                self.cachedThumbnailImages![(asset.originalAsset?.localIdentifier)!] = image
+            }
+        }else{
+            cell.thumbnailImageView.image = self.cachedThumbnailImages![(asset.originalAsset?.localIdentifier)!]
+        }
 		
 		if let index = self.imagePickerController.selectedAssets.indexOf(asset) {
 			cell.selected = true
@@ -474,6 +499,50 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 		
 		return cell
 	}
+
+    func cellCheckedImage() -> UIImage?{
+        if cachedCheckedImage == nil{
+            cachedCheckedImage = (self.imagePickerController.UIDelegate.imagePickerControllerCheckedImage()
+                    ?? DKImageResource.checkedImage()).imageWithRenderingMode(.AlwaysTemplate)
+        }
+        return cachedCheckedImage
+    }
+
+    func cellSettingsByAsset(asset: DKAsset) -> (String, UIImage?) {
+        let originalAsset = asset.originalAsset!
+        switch (originalAsset.mediaType, originalAsset.mediaSubtypes){
+        case let (.Image, x) where x.contains(.PhotoLive): //Live Photo
+            if self.cachedLivePhotoIconInfo == nil{
+                self.cachedLivePhotoIconInfo = (
+                        DKMediaAssetIdentifier,
+                        self.imagePickerController.UIDelegate.imagePickerControllerAssetLivePhotoIconImage()
+                        )
+            }
+            return self.cachedLivePhotoIconInfo!
+            
+        case (.Image, _):
+            if self.cachedPhotoIconInfo == nil{
+                self.cachedPhotoIconInfo = (
+                        DKImageAssetIdentifier,
+                        self.imagePickerController.UIDelegate.imagePickerControllerAssetPhotoIconImage()
+                        )
+            }
+            return self.cachedPhotoIconInfo!
+
+        case (.Video, _):
+            if self.cachedVideoIconInfo == nil{
+                self.cachedVideoIconInfo = (
+                        DKMediaAssetIdentifier,
+                        self.imagePickerController.UIDelegate.imagePickerControllerAssetVideoIconImage()
+                                ?? DKImageResource.videoCameraIcon()
+                        )
+            }
+            return self.cachedVideoIconInfo!
+
+        default:
+            return (DKImageAssetIdentifier, nil)
+        }
+    }
 
     // MARK: - UICollectionViewDelegate, UICollectionViewDataSource methods
 
@@ -579,11 +648,13 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 			}
 		}
 		if self.selectedGroupId == groupId {
+            self.invalidateCachedAssetsOfCurrentGroup()
 			self.collectionView?.reloadData()
 		}
 	}
 	
 	func group(groupId: String, didInsertAssets assets: [DKAsset]) {
+        self.invalidateCachedAssetsOfCurrentGroup()
 		self.collectionView?.reloadData()
 	}
 
