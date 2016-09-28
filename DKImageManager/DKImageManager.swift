@@ -63,7 +63,7 @@ public class DKImageManager: DKBaseManager {
 	
 	static let sharedInstance = DKImageManager()
 	
-	private let manager = PHCachingImageManager.defaultManager()
+	private let manager = PHImageManager()
 	
 	private lazy var defaultImageRequestOptions: PHImageRequestOptions = {
 		let options = PHImageRequestOptions()

@@ -244,10 +244,9 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 	
 	private lazy var groupImageRequestOptions: PHImageRequestOptions = {
 		let options = PHImageRequestOptions()
-		options.deliveryMode = .HighQualityFormat
-		options.resizeMode = .Exact
-		
-		return options
+		options.deliveryMode = .Opportunistic
+		options.resizeMode = .Fast
+        return options
 	}()
     
     override func viewDidLoad() {
@@ -298,11 +297,16 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
         }
 
         DKImageManager.sharedInstance.invalidateCaches()
+        self.invalidateCaches(false)
+    }
 
+    func invalidateCaches(fromMemoryWarning:Bool){
         self.invalidateCachedStaticResources()
         self.invalidateCachedAssetsOfCurrentGroup()
 
-//        self.cachedThumbnailImages = nil
+        if fromMemoryWarning{
+            self.cachedThumbnailImages = nil
+        }
     }
 
     func invalidateCachedStaticResources(){

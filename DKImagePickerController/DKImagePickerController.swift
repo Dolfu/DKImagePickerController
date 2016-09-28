@@ -288,6 +288,8 @@ public class DKImagePickerController : UINavigationController {
     }
         
     public var selectedAssets = [DKAsset]()
+
+	private var memoryWarningObserver: NSObjectProtocol?
 	
     public convenience init() {
 		let rootVC = UIViewController()
@@ -301,10 +303,19 @@ public class DKImagePickerController : UINavigationController {
 		getImageManager().groupDataManager.assetFetchOptions = self.createAssetFetchOptions()
 		getImageManager().groupDataManager.showsEmptyAlbums = self.showsEmptyAlbums
 		getImageManager().autoDownloadWhenAssetIsInCloud = self.autoDownloadWhenAssetIsInCloud
+
+		memoryWarningObserver = NSNotificationCenter.defaultCenter().addObserverForName(UIApplicationDidReceiveMemoryWarningNotification, object: nil, queue:  NSOperationQueue.mainQueue()) { notification in
+			if let rootVC = self.viewControllers.first as? DKAssetGroupDetailVC {
+				rootVC.invalidateCaches(true)
+			}
+		}
     }
     
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
+		if let _memoryWarningObserver = memoryWarningObserver {
+			NSNotificationCenter.defaultCenter().removeObserver(_memoryWarningObserver)
+		}
 		getImageManager().invalidate()
     }
     
