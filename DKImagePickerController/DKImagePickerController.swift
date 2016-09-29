@@ -221,6 +221,9 @@ public class DKImagePickerController : UINavigationController {
 	
 	/// The type of picker interface to be displayed by the controller.
 	public var assetType: DKImagePickerControllerAssetType = .All {
+		willSet(newAssetType) {
+			self.needsReloadAllWhenNextPresent = assetType != newAssetType
+		}
 		didSet {
 			getImageManager().groupDataManager.assetFetchOptions = self.createAssetFetchOptions()
 		}
@@ -332,6 +335,8 @@ public class DKImagePickerController : UINavigationController {
     }
 	
 	private var hasInitialized = false
+	private var needsReloadAllWhenNextPresent = false
+
 	override public func viewWillAppear(animated: Bool) {
 		super.viewWillAppear(animated)
 		
@@ -366,7 +371,12 @@ public class DKImagePickerController : UINavigationController {
 			//reload from previous invaildation cycle
 			if !self.isMovingToParentViewController(){
 				if let rootVC = self.viewControllers.first as? DKAssetGroupDetailVC {
-					rootVC.collectionView?.reloadItemsAtIndexPaths((rootVC.collectionView?.indexPathsForVisibleItems())!)
+					if self.needsReloadAllWhenNextPresent{
+						rootVC.reloadAllCurrentGroupData()
+						self.needsReloadAllWhenNextPresent = false
+					}else{
+						rootVC.collectionView?.reloadItemsAtIndexPaths((rootVC.collectionView?.indexPathsForVisibleItems())!)
+					}
 				}
 			}
 		}

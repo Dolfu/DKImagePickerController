@@ -360,9 +360,23 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
         }
 
         self.selectedGroupId = groupId
+
         self.updateTitleView()
+
+        self.reloadCollectionViews()
+    }
+
+    func reloadAllCurrentGroupData() {
+        getImageManager().invalidate()
+
+        self.groupListVC.loadGroups()
+
+        self.reloadCollectionViews()
+    }
+
+    func reloadCollectionViews(){
         if(self.imagePickerController.deselectAllWhenChangingAlbum
-            || self.imagePickerController.allowCirculatingSelection){            
+                || self.imagePickerController.allowCirculatingSelection){
             self.imagePickerController.deselectAllAssets(false)
         }
         self.invalidateCachedAssetsOfCurrentGroup()
