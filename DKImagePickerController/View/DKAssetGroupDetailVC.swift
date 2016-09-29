@@ -136,11 +136,15 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 
         override var asset: DKAsset! {
 			didSet {
+                let videoDurationLabel = self.videoInfoView.viewWithTag(TagForDurationLabel) as! UILabel
                 if self.asset.duration>0 {
-                    let videoDurationLabel = self.videoInfoView.viewWithTag(TagForDurationLabel) as! UILabel
                     let minutes: Int = Int(asset.duration!) / 60
                     let seconds: Int = Int(round(asset.duration!)) % 60
                     videoDurationLabel.text = String(format: "\(minutes):%02d", seconds)
+                    videoDurationLabel.hidden = false
+                }else{
+                    videoDurationLabel.text = nil
+                    videoDurationLabel.hidden = true
                 }
 			}
 		}
@@ -482,6 +486,7 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
             cachedThumbnailImages = [:]
         }
         if cachedThumbnailImages!.indexForKey((asset.originalAsset?.localIdentifier)!) == nil{
+            //FIXME: huge memory leaks. but why? it just uses pure ios api.
             asset.fetchImageWithSize(itemSize.toPixel(), options: self.groupImageRequestOptions, contentMode: .AspectFill) { (image, info) in
                 if cell.tag == tag {
                     cell.thumbnailImageView.image = image
