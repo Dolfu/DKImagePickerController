@@ -90,7 +90,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
 			["Allows landscape"],
 			["Single select"]
         ]
-        static let types: [DKImagePickerControllerAssetType] = [.AllAssets, .AllPhotos, .AllVideos, .AllAssets]
+        static let types: [DKImagePickerControllerAssetType] = [.All, .Photos, .Videos, .All]
     }
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {

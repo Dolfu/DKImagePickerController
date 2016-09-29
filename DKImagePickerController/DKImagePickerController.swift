@@ -159,13 +159,14 @@ public protocol DKImagePickerControllerUIDelegate {
 }
 
 /**
-- AllPhotos: Get all photos assets in the assets group.
-- AllVideos: Get all video assets in the assets group.
-- AllAssets: Get all assets in the group.
+- Photos: Get all photos assets in the assets group.
+- LivePhotos: Get all live photos assets in the assets group.
+- Videos: Get all video assets in the assets group.
+- All: Get all assets in the group.
 */
 @objc
 public enum DKImagePickerControllerAssetType : Int {
-	case AllPhotos, AllVideos, AllAssets
+	case Photos, LivePhotos, Videos, All
 }
 
 @objc
@@ -219,7 +220,7 @@ public class DKImagePickerController : UINavigationController {
 	}
 	
 	/// The type of picker interface to be displayed by the controller.
-	public var assetType: DKImagePickerControllerAssetType = .AllAssets {
+	public var assetType: DKImagePickerControllerAssetType = .All {
 		didSet {
 			getImageManager().groupDataManager.assetFetchOptions = self.createAssetFetchOptions()
 		}
@@ -234,6 +235,13 @@ public class DKImagePickerController : UINavigationController {
 	
 	/// The predicate applies to videos only.
 	public var videoFetchPredicate: NSPredicate? {
+		didSet {
+			getImageManager().groupDataManager.assetFetchOptions = self.createAssetFetchOptions()
+		}
+	}
+
+	/// The predicate applies to LivePhotos only.
+	public var livePhotoFetchPredicate: NSPredicate? {
 		didSet {
 			getImageManager().groupDataManager.assetFetchOptions = self.createAssetFetchOptions()
 		}
@@ -391,6 +399,15 @@ public class DKImagePickerController : UINavigationController {
 	
 			return imagePredicate
 		}
+
+		let createLivePhotosPredicate = { () -> NSPredicate in
+			var livePhotoPredicate = NSPredicate(format: "mediaSubtype == %ld", PHAssetMediaSubtype.PhotoLive.rawValue)
+			if let livePhotoFetchPredicate = self.livePhotoFetchPredicate {
+				livePhotoPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [livePhotoPredicate, livePhotoFetchPredicate])
+			}
+
+			return livePhotoPredicate
+		}
 		
 		let createVideoPredicate = { () -> NSPredicate in
 			var videoPredicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.Video.rawValue)
@@ -403,12 +420,14 @@ public class DKImagePickerController : UINavigationController {
 		
 		var predicate: NSPredicate?
 		switch self.assetType {
-		case .AllAssets:
-			predicate = NSCompoundPredicate(orPredicateWithSubpredicates: [createImagePredicate(), createVideoPredicate()])
-		case .AllPhotos:
-			predicate = createImagePredicate()
-		case .AllVideos:
-			predicate = createVideoPredicate()
+			case .All:
+				predicate = NSCompoundPredicate(orPredicateWithSubpredicates: [createImagePredicate(), createLivePhotosPredicate(), createVideoPredicate()])
+			case .Photos:
+				predicate = createImagePredicate()
+			case .LivePhotos:
+				predicate = createLivePhotosPredicate()
+			case .Videos:
+				predicate = createVideoPredicate()
 		}
 		
 		self.assetFetchOptions.predicate = predicate
