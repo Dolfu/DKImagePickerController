@@ -208,10 +208,10 @@ class DKAssetGroupListVC: UITableViewController, DKGroupDataManagerObserver {
 				strongSelf.groups = groups!
 				strongSelf.selectedGroup = strongSelf.defaultAssetGroupOfAppropriate()
 				if let selectedGroup = strongSelf.selectedGroup {
-					strongSelf.tableView.selectRowAtIndexPath(NSIndexPath(forRow: groups!.indexOf(selectedGroup)!, inSection: 0),
-						animated: false,
-						scrollPosition: .None)
-				}
+                    try! strongSelf.tableView.selectRowAtIndexPath(NSIndexPath(forRow: groups!.indexOf(selectedGroup)!, inSection: 0),
+                        animated: false,
+                        scrollPosition: .None)
+                }
 				
 				strongSelf.selectedGroupDidChangeBlock?(group: strongSelf.selectedGroup)
 			}
