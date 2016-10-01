@@ -361,8 +361,6 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
 
         self.selectedGroupId = groupId
 
-        self.updateTitleView()
-
         self.reloadCollectionViews()
     }
 
@@ -370,11 +368,14 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
         getImageManager().invalidate()
 
         self.groupListVC.loadGroups()
+        self.groupListVC.tableView.reloadData()
 
         self.reloadCollectionViews()
     }
 
     func reloadCollectionViews(){
+        self.updateTitleView()
+
         if(self.imagePickerController.deselectAllWhenChangingAlbum
                 || self.imagePickerController.allowCirculatingSelection){
             self.imagePickerController.deselectAllAssets(false)
@@ -392,6 +393,8 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
         if groupsCount > 1{
             //create pretty arrow
             let addingDownArrowStr = "  \u{FE40}"
+            let originalFont = self.selectGroupButton.titleLabel!.font
+
             self.selectGroupButton.setAttributedTitle(nil, forState: .Normal)
             self.selectGroupButton.setTitle(group.groupName + addingDownArrowStr, forState: .Normal)
             let attributedString = NSMutableAttributedString(attributedString: (self.selectGroupButton.titleLabel?.attributedText)!)
@@ -400,7 +403,7 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
             attributedString.enumerateAttribute(NSFontAttributeName, inRange:rangeToApply, options:.LongestEffectiveRangeNotRequired,
                     usingBlock: { value, range, stop in
                         let font = value as! UIFont
-                        attributedString.addAttribute(NSFontAttributeName, value:font.fontWithSize(font.pointSize/1.5), range:range)
+                        attributedString.addAttribute(NSFontAttributeName, value:font.fontWithSize(originalFont.pointSize/1.5), range:range)
                     })
             attributedString.addAttribute(NSBaselineOffsetAttributeName, value: -2.5, range: rangeToApply)
             attributedString.addAttribute(NSKernAttributeName, value: -1.5, range: rangeToApply)
