@@ -514,7 +514,7 @@ internal class DKAssetGroupDetailVC: UIViewController, UICollectionViewDelegate,
             cell.thumbnailImageView.image = self.cachedThumbnailImages![(asset.originalAsset?.localIdentifier)!]
         }
 		
-		if let index = try! self.imagePickerController.selectedAssets.indexOf(asset) {
+		if let index = self.imagePickerController.selectedAssets.indexOf(asset) {
 			cell.selected = true
 			cell.checkView.checkLabel.text = "\(index + 1)"
 			self.collectionView!.selectItemAtIndexPath(indexPath, animated: false, scrollPosition: UICollectionViewScrollPosition.None)
