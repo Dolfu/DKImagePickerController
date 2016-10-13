@@ -8,7 +8,11 @@
 //  Released under an MIT license: http://opensource.org/licenses/MIT
 //
 
-"select" = "Seçili(%ld)";
+"selects" = "Seçili(%ld/%ld)";
+
+"selectn" = "Seçili(%ld)";
+
+"select" = "Seçili";
 
 "permissionCamera" = "Kamera erişimine izin veriniz.";
 

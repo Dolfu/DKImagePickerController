@@ -187,7 +187,18 @@ public class DKImagePickerControllerDefaultUIDelegate: NSObject, DKImagePickerCo
 	
 	public func updateDoneButtonTitle(button: UIButton) {
 		if self.imagePickerController.selectedAssets.count > 0 {
-			button.setTitle(String(format: DKImageLocalizedStringWithKey("select"), self.imagePickerController.selectedAssets.count), forState: UIControlState.Normal)
+			let selectLabel:String = {
+				switch self.imagePickerController.maxSelectableCount {
+				case 999:
+					return String(format: DKImageLocalizedStringWithKey("selectn"), self.imagePickerController.selectedAssets.count);
+				default:
+					return self.imagePickerController.maxSelectableCount>1
+					? String(format: DKImageLocalizedStringWithKey("selects"), self.imagePickerController.selectedAssets.count, self.imagePickerController.maxSelectableCount)
+					: String(format: DKImageLocalizedStringWithKey("select"), self.imagePickerController.selectedAssets.count)
+				}
+			}()
+
+			button.setTitle(selectLabel, forState: UIControlState.Normal)
 		} else {
 			button.setTitle(DKImageLocalizedStringWithKey("done"), forState: UIControlState.Normal)
 		}

@@ -8,7 +8,11 @@
 //  Released under an MIT license: http://opensource.org/licenses/MIT
 //
 
-"select" = "Выбрать(%ld)";
+"selects" = "Выбрать(%ld/%ld)";
+
+"selectn" = "Выбрать(%ld)";
+
+"select" = "Выбрать";
 
 "permissionCamera" = "Пожалуйста, разрешите доступ к камере";
 

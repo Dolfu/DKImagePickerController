@@ -8,7 +8,11 @@
 //  Released under an MIT license: http://opensource.org/licenses/MIT
 //
 
-"select" = "選択(%ld)";
+"selects" = "選択(%ld/%ld)";
+
+"selectn" = "選択(%ld)";
+
+"select" = "選択";
 
 "permissionCamera" = "カメラへのアクセスを許可してください";
 

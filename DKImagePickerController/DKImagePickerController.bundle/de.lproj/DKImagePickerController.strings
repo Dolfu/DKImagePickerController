@@ -8,7 +8,11 @@
 //  Released under an MIT license: http://opensource.org/licenses/MIT
 //
 
-"select" = "Auswählen (%ld)";
+"selects" = "Auswählen (%ld/%ld)";
+
+"selectn" = "Auswählen (%ld)";
+
+"select" = "Auswählen";
 
 "permissionCamera" = "Bitte gestatte der App den Zugriff zur Kamera";
 

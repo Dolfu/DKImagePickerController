@@ -8,7 +8,11 @@
 //  Released under an MIT license: http://opensource.org/licenses/MIT
 //
 
-"select" = "(%ld)منتخب کریں";
+"selects" = "(%ld/%ld)منتخب کریں";
+
+"selectn" = "(%ld)منتخب کریں";
+
+"select" = "منتخب کریں";
 
 "permissionCamera" = "براےْ مھربانی کیمرے کی رسائی کی اجازت دیں";
 

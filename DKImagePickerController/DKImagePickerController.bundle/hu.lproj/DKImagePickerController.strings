@@ -8,7 +8,11 @@
 //  Released under an MIT license: http://opensource.org/licenses/MIT
 //
 
-"select" = "Kiválaszt(%ld)";
+"selects" = "Kiválaszt(%ld/%ld)";
+
+"selectn" = "Kiválaszt(%ld)";
+
+"select" = "Kiválaszt";
 
 "permissionCamera" = "Kérlek adj hozzáférést a Kamerához";
 

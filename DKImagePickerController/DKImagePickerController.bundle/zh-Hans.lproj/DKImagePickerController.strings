@@ -8,7 +8,11 @@
 //  Released under an MIT license: http://opensource.org/licenses/MIT
 //
 
-"select" = "选择(%ld)";
+"selects" = "选择 (%ld/%ld)";
+
+"selectn" = "选择 (%ld)";
+
+"select" = "选择";
 
 "permissionCamera" = "请授权使用相机";
 
